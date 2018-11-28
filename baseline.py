@@ -114,6 +114,8 @@ def main(args):
         model.load_state_dict(checkpoint)
 
         print("Test the loaded model:")
+        print( type(dataset.query) )
+        #print( dataset.query )
         top1, mAP = evaluator.evaluate(test_loader, dataset.query, dataset.gallery, rerank_topk=100, dataset=args.dataset)
         best_mAP = mAP
 
