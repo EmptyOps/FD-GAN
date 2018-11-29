@@ -26,10 +26,10 @@ from reid.evaluators import CascadeEvaluator
 from reid.trainers import SiameseTrainer
 
 def get_data(name, split_id, data_dir, height, width, batch_size, workers,
-             combine_trainval, np_ratio):
+             combine_trainval, np_ratio, args):
     root = osp.join(data_dir, name)
 
-    dataset = datasets.create(name, root, split_id=split_id)
+    dataset = datasets.create(name, root, split_id=split_id, truncate=args.truncate)
 
     normalizer = T.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
@@ -90,7 +90,7 @@ def main(args):
     dataset, train_loader, val_loader, test_loader = \
         get_data(args.dataset, args.split, args.data_dir, args.height,
                  args.width, args.batch_size, args.workers,
-                 args.combine_trainval, args.np_ratio)
+                 args.combine_trainval, args.np_ratio, args)
 
     # Create model
     base_model = models.create(args.arch, cut_at_pooling=True)
@@ -199,4 +199,8 @@ if __name__ == '__main__':
                         default=osp.join(working_dir, 'datasets'))
     parser.add_argument('--logs-dir', type=str, metavar='PATH',
                         default=osp.join(working_dir, 'checkpoints'))
+
+    #experimental
+    parser.add_argument('--truncate', type=int, default=-1)
+
     main(parser.parse_args())

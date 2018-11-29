@@ -8,8 +8,8 @@ from ..utils.serialization import write_json
 
 class Market1501(Dataset):
 
-    def __init__(self, root, split_id=0, num_val=100):
-        super(Market1501, self).__init__(root, split_id=split_id)
+    def __init__(self, root, split_id=0, num_val=100, truncate=-1):
+        super(Market1501, self).__init__(root, split_id=split_id, truncate=truncate)
 
         if not self._check_integrity():
             raise RuntimeError("Dataset not found or corrupted. " +

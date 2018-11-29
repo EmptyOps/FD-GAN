@@ -34,7 +34,7 @@ def _pluck(identities, indices, relabel=False, truncate=-1):
     return ret, query
 
 class Dataset(object):
-    def __init__(self, root, split_id=0):
+    def __init__(self, root, split_id=0, truncate=-1):
         self.root = root
         self.split_id = split_id
         self.meta = None
@@ -42,6 +42,7 @@ class Dataset(object):
         self.train, self.val, self.trainval = [], [], []
         self.query, self.gallery = [], []
         self.num_train_ids, self.num_val_ids, self.num_trainval_ids = 0, 0, 0
+        self.truncate = truncate
 
     def __len__(self):
         return
@@ -73,10 +74,10 @@ class Dataset(object):
 
         self.meta = read_json(osp.join(self.root, 'meta.json'))
         identities = self.meta['identities']
-        self.train, self.train_query = _pluck(identities, train_pids, relabel=True, truncate=15)
-        self.val, self.val_query = _pluck(identities, val_pids, relabel=True, truncate=15)
-        self.trainval, self.trainval_query = _pluck(identities, trainval_pids, relabel=True, truncate=15)
-        self.query, self.query_query = _pluck(identities, self.split['query'], truncate=15)
+        self.train, self.train_query = _pluck(identities, train_pids, relabel=True, truncate=self.truncate)
+        self.val, self.val_query = _pluck(identities, val_pids, relabel=True, truncate=self.truncate)
+        self.trainval, self.trainval_query = _pluck(identities, trainval_pids, relabel=True, truncate=self.truncate)
+        self.query, self.query_query = _pluck(identities, self.split['query'], truncate=self.truncate)
 
         #trying to figure out solution for gpu memory error by loading lower number of data as required on request during model testing
         print( len(self.query) )
@@ -89,7 +90,7 @@ class Dataset(object):
         #print( self.query_query )
         #print( self.query )
 
-        self.gallery, self.gallery_query = _pluck(identities, self.split['gallery'], truncate=15)
+        self.gallery, self.gallery_query = _pluck(identities, self.split['gallery'], truncate=self.truncate)
         self.num_train_ids = len(train_pids)
         self.num_val_ids = len(val_pids)
         self.num_trainval_ids = len(trainval_pids)
