@@ -5,10 +5,14 @@ import numpy as np
 
 from ..serialization import read_json
 
-def _pluck(identities, indices, relabel=False):
+def _pluck(identities, indices, relabel=False, truncate=-1):
     ret = []
     query = {}
     for index, pid in enumerate(indices):
+        print("_pluck index at " + str(index))
+        if not truncate == -1 and index >= truncate:
+            break       
+
         pid_images = identities[pid]
         if relabel:
             if index not in query.keys():
@@ -69,11 +73,23 @@ class Dataset(object):
 
         self.meta = read_json(osp.join(self.root, 'meta.json'))
         identities = self.meta['identities']
-        self.train, self.train_query = _pluck(identities, train_pids, relabel=True)
-        self.val, self.val_query = _pluck(identities, val_pids, relabel=True)
-        self.trainval, self.trainval_query = _pluck(identities, trainval_pids, relabel=True)
-        self.query, self.query_query = _pluck(identities, self.split['query'])
-        self.gallery, self.gallery_query = _pluck(identities, self.split['gallery'])
+        self.train, self.train_query = _pluck(identities, train_pids, relabel=True, truncate=15)
+        self.val, self.val_query = _pluck(identities, val_pids, relabel=True, truncate=15)
+        self.trainval, self.trainval_query = _pluck(identities, trainval_pids, relabel=True, truncate=15)
+        self.query, self.query_query = _pluck(identities, self.split['query'], truncate=15)
+
+        #trying to figure out solution for gpu memory error by loading lower number of data as required on request during model testing
+        print( len(self.query) )
+        print( len(self.query_query) )
+        print( len(self.split['query']) )
+        print( type(self.query) )
+        print( type(self.query_query) )
+        print( type(self.split['query']) )
+        print( self.split['query'] )
+        #print( self.query_query )
+        #print( self.query )
+
+        self.gallery, self.gallery_query = _pluck(identities, self.split['gallery'], truncate=15)
         self.num_train_ids = len(train_pids)
         self.num_val_ids = len(val_pids)
         self.num_trainval_ids = len(trainval_pids)
